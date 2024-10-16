@@ -10,6 +10,16 @@
 <body>
     <div class="todo-box">
         <h1>Todo List</h1>
+        <form class="project-form">
+            <input type="text" class="project-input" placeholder="Add a project" required>
+            <button type="submit" class="project-button">Add Project</button>
+        </form>
+        <div class="project-select">
+            <label for="project-select">Select Project:</label>
+            <select class="project-dropdown">
+                <option value="default">Select a project</option>
+            </select>
+        </div>
         <form class="todo-form">
             <input type="text" class="todo-input" placeholder="Add a task" required>
             <input type="date" class="todo-duedate">
