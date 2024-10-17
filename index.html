@@ -3,47 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List with Priority Filter</title>
     <link rel="stylesheet" href="styles.css">
-    <title>To-Do List App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>To-Do List</h1>
+    <div class="todo-box">
+        <h1>Todo List</h1>
         <form class="project-form">
-            <input type="text" class="project-input" placeholder="Add a new project...">
+            <input type="text" class="project-input" placeholder="Add a project" required>
             <button type="submit" class="project-button">Add Project</button>
-            <select class="project-dropdown">
-                <option value="default" disabled selected>Select a Project</option>
-            </select>
         </form>
-        
+        <div class="project-select">
+            <label for="project-select">Select Project:</label>
+            <select class="project-dropdown">
+                <option value="default">Select a project</option>
+            </select>
+        </div>
         <form class="todo-form">
-            <input type="text" class="todo-input" placeholder="Add a new to-do...">
+            <input type="text" class="todo-input" placeholder="Add a task" required>
             <input type="date" class="todo-duedate">
             <select class="todo-priority">
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
             </select>
-            <button type="submit" class="todo-button">Add To-Do</button>
+            <button type="submit" class="todo-button">Add Todo</button>
         </form>
-        
-        <div class="filter-container">
+        <ul class="todo-list"></ul>
+        <div class="filter">
+            <label for="filter-todo">Filter Todos:</label>
             <select class="filter-todo">
                 <option value="all">All</option>
                 <option value="completed">Completed</option>
                 <option value="incomplete">Incomplete</option>
             </select>
-            <div class="filter-priority-container">
-                <button class="filter-priority-btn active" value="Low">Low</button>
-                <button class="filter-priority-btn" value="Medium">Medium</button>
-                <button class="filter-priority-btn" value="High">High</button>
-            </div>
         </div>
-        
-        <ul class="todo-list"></ul>
+        <div class="filter-priority">
+            <button class="filter-priority-btn" data-priority="Low">Low Priority</button>
+            <button class="filter-priority-btn" data-priority="Medium">Medium Priority</button>
+            <button class="filter-priority-btn" data-priority="High">High Priority</button>
+        </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>

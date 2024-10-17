@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 projectButton.addEventListener("click", addProject);
 todoButton.addEventListener("click", addTodo);
-todoList.addEventListener("click", handleTodoAction);
+todoList.addEventListener("click", handleTodoAction); 
 filterOption.addEventListener("change", filterTodo);
 priorityButtons.forEach(button => button.addEventListener("click", filterByPriority));
 
@@ -31,7 +31,7 @@ function addProject(event) {
     projectDropdown.appendChild(projectOption);
 
     saveLocalProjects(projectName);
-
+    
     // Clear input value
     projectInput.value = "";
 }
@@ -48,9 +48,9 @@ function addTodo(event) {
 
     const todoDiv = document.createElement("div");
     todoDiv.classList.add("todo");
-
+    
     const newTodo = document.createElement("li");
-    newTodo.innerText = todoInput.value;
+    newTodo.innerText = todoInput.value; 
     newTodo.classList.add("todo-item");
     todoDiv.appendChild(newTodo);
 
@@ -66,7 +66,7 @@ function addTodo(event) {
 
     // Save to Local Storage
     saveLocalTodos(todoInput.value, todoDueDate.value, todoPriority.value, selectedProject);
-
+    
     // Completed Button
     const completedButton = document.createElement("button");
     completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
@@ -78,14 +78,14 @@ function addTodo(event) {
     deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
     deleteButton.classList.add("delete-btn");
     todoDiv.appendChild(deleteButton);
-
+    
     // Append to List
     todoList.appendChild(todoDiv);
 
     // Clear input values
     todoInput.value = "";
     todoDueDate.value = "";
-    todoPriority.value = "Low";
+    todoPriority.value = "Low"; 
 }
 
 function handleTodoAction(event) {
@@ -212,25 +212,17 @@ function getLocalTodos() {
         priority.classList.add("priority");
         todoDiv.appendChild(priority);
 
-        // Completed Button
         const completedButton = document.createElement("button");
         completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
         completedButton.classList.add("complete-btn");
         todoDiv.appendChild(completedButton);
 
-        // Delete Button
         const deleteButton = document.createElement("button");
         deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
         deleteButton.classList.add("delete-btn");
         todoDiv.appendChild(deleteButton);
 
-        // Append to List
         todoList.appendChild(todoDiv);
-
-        // Restore completed state
-        if (todoData.completed) {
-            todoDiv.classList.add("completed");
-        }
     });
 }
 
@@ -242,6 +234,7 @@ function removeLocalTodos(todo) {
         todos = JSON.parse(localStorage.getItem("todos"));
     }
     const todoText = todo.children[0].innerText;
-    todos.splice(todos.indexOf(todoText), 1);
+    todos = todos.filter(t => t.todo !== todoText);
     localStorage.setItem("todos", JSON.stringify(todos));
 }
+    
