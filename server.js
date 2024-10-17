@@ -1,123 +1,66 @@
-const express = require('express'); // Import express
-const fs = require('fs'); // Import file system module
-const path = require('path'); // Import path module
-const app = express(); // Create an express application
+// server.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
-const projectsFilePath = path.join(__dirname, 'projects.json'); // Path to projects JSON file
-const todosFilePath = path.join(__dirname, 'todos.json'); // Path to todos JSON file
+const app = express();
+const PORT = 5000;
 
-app.use(express.json()); // Middleware to parse JSON requests
+app.use(cors());
+app.use(bodyParser.json());
 
-// ---- Create a New Project ----
-app.post('/api/projects', (req, res) => {
-    const newProject = req.body; // Get new project from request body
-    fs.readFile(projectsFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        const projects = JSON.parse(data); // Parse existing projects
-        projects.push(newProject); // Add new project
-        fs.writeFile(projectsFilePath, JSON.stringify(projects), err => { // Write back to file
-            if (err) return res.status(500).send(err); // Handle write error
-            res.status(201).send(newProject); // Respond with created project
-        });
-    });
+// File path for the todos data
+const todosFilePath = path.join(__dirname, 'data', 'todos.json');
+
+// Helper functions to read and write todos
+const readTodos = () => {
+    const data = fs.readFileSync(todosFilePath);
+    return JSON.parse(data);
+};
+
+const writeTodos = (todos) => {
+    fs.writeFileSync(todosFilePath, JSON.stringify(todos, null, 2));
+};
+
+// GET todos
+app.get('/todos', (req, res) => {
+    const todos = readTodos();
+    res.json(todos);
 });
 
-// ---- Read All Projects ----
-app.get('/api/projects', (req, res) => {
-    fs.readFile(projectsFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        res.json(JSON.parse(data)); // Send projects as JSON response
-    });
+// POST a new todo
+app.post('/todos', (req, res) => {
+    const todos = readTodos();
+    const newTodo = { id: Date.now(), ...req.body }; // Create a new todo with a unique ID
+    todos.push(newTodo);
+    writeTodos(todos);
+    res.status(201).json(newTodo);
 });
 
-// ---- Update a Project ----
-app.put('/api/projects/:id', (req, res) => {
-    const projectId = req.params.id; // Get project ID from URL
-    const updatedProject = req.body; // Get updated project data from request body
-    fs.readFile(projectsFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        const projects = JSON.parse(data); // Parse existing projects
-        const index = projects.findIndex(p => p.id === projectId); // Find project by ID
-        if (index === -1) return res.status(404).send('Project not found'); // Handle not found
-        projects[index] = updatedProject; // Update project
-        fs.writeFile(projectsFilePath, JSON.stringify(projects), err => { // Write back to file
-            if (err) return res.status(500).send(err); // Handle write error
-            res.send(updatedProject); // Respond with updated project
-        });
-    });
+// PUT to update a todo
+app.put('/todos/:id', (req, res) => {
+    const todos = readTodos();
+    const todoIndex = todos.findIndex(todo => todo.id == req.params.id);
+    if (todoIndex !== -1) {
+        todos[todoIndex] = { ...todos[todoIndex], ...req.body };
+        writeTodos(todos);
+        res.json(todos[todoIndex]);
+    } else {
+        res.status(404).json({ message: 'Todo not found' });
+    }
 });
 
-// ---- Delete a Project ----
-app.delete('/api/projects/:id', (req, res) => {
-    const projectId = req.params.id; // Get project ID from URL
-    fs.readFile(projectsFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        let projects = JSON.parse(data); // Parse existing projects
-        projects = projects.filter(p => p.id !== projectId); // Remove project
-        fs.writeFile(projectsFilePath, JSON.stringify(projects), err => { // Write back to file
-            if (err) return res.status(500).send(err); // Handle write error
-            res.status(204).send(); // Respond with no content
-        });
-    });
-});
-
-// ---- Additional CRUD Operations for Todos ----
-
-// ---- Create a New Todo ----
-app.post('/api/todos', (req, res) => {
-    const newTodo = req.body; // Get new todo from request body
-    fs.readFile(todosFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        const todos = JSON.parse(data); // Parse existing todos
-        todos.push(newTodo); // Add new todo
-        fs.writeFile(todosFilePath, JSON.stringify(todos), err => { // Write back to file
-            if (err) return res.status(500).send(err); // Handle write error
-            res.status(201).send(newTodo); // Respond with created todo
-        });
-    });
-});
-
-// ---- Read All Todos ----
-app.get('/api/todos', (req, res) => {
-    fs.readFile(todosFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        res.json(JSON.parse(data)); // Send todos as JSON response
-    });
-});
-
-// ---- Update a Todo ----
-app.put('/api/todos/:id', (req, res) => {
-    const todoId = req.params.id; // Get todo ID from URL
-    const updatedTodo = req.body; // Get updated todo data from request body
-    fs.readFile(todosFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        const todos = JSON.parse(data); // Parse existing todos
-        const index = todos.findIndex(t => t.id === todoId); // Find todo by ID
-        if (index === -1) return res.status(404).send('Todo not found'); // Handle not found
-        todos[index] = updatedTodo; // Update todo
-        fs.writeFile(todosFilePath, JSON.stringify(todos), err => { // Write back to file
-            if (err) return res.status(500).send(err); // Handle write error
-            res.send(updatedTodo); // Respond with updated todo
-        });
-    });
-});
-
-// ---- Delete a Todo ----
-app.delete('/api/todos/:id', (req, res) => {
-    const todoId = req.params.id; // Get todo ID from URL
-    fs.readFile(todosFilePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send(err); // Handle read error
-        let todos = JSON.parse(data); // Parse existing todos
-        todos = todos.filter(t => t.id !== todoId); // Remove todo
-        fs.writeFile(todosFilePath, JSON.stringify(todos), err => { // Write back to file
-            if (err) return res.status(500).send(err); // Handle write error
-            res.status(204).send(); // Respond with no content
-        });
-    });
+// DELETE a todo
+app.delete('/todos/:id', (req, res) => {
+    const todos = readTodos();
+    const newTodos = todos.filter(todo => todo.id != req.params.id);
+    writeTodos(newTodos);
+    res.status(204).send();
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000; // Define the port
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`); // Log server start
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
