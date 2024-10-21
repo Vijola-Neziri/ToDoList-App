@@ -127,46 +127,27 @@ function filterTodo(event) {
 }
 
 function filterByPriority(event) {
-    const selectedPriority = event.target.value;
+    const selectedPriority = event.target.getAttribute("data-priority");
     const todos = todoList.childNodes;
 
     todos.forEach(todo => {
         const priorityText = todo.querySelector(".priority").innerText;
-        if (selectedPriority === "Low" && priorityText.includes("Low") ||
-            selectedPriority === "Medium" && priorityText.includes("Medium") ||
-            selectedPriority === "High" && priorityText.includes("High")) {
+        if (priorityText.includes(selectedPriority) || selectedPriority === "All") {
             todo.style.display = "flex";
         } else {
             todo.style.display = "none";
         }
     });
-
-    // Mark the selected button
-    priorityButtons.forEach(button => {
-        button.classList.remove("active");
-    });
-    event.target.classList.add("active");
 }
 
-// Local Storage functions
 function saveLocalProjects(project) {
-    let projects;
-    if (localStorage.getItem("projects") === null) {
-        projects = [];
-    } else {
-        projects = JSON.parse(localStorage.getItem("projects"));
-    }
+    let projects = localStorage.getItem("projects") ? JSON.parse(localStorage.getItem("projects")) : [];
     projects.push(project);
     localStorage.setItem("projects", JSON.stringify(projects));
 }
 
 function getLocalProjects() {
-    let projects;
-    if (localStorage.getItem("projects") === null) {
-        projects = [];
-    } else {
-        projects = JSON.parse(localStorage.getItem("projects"));
-    }
+    let projects = localStorage.getItem("projects") ? JSON.parse(localStorage.getItem("projects")) : [];
     projects.forEach(project => {
         const projectOption = document.createElement("option");
         projectOption.value = project;
@@ -176,65 +157,60 @@ function getLocalProjects() {
 }
 
 function saveLocalTodos(todo, dueDate, priority, project) {
-    let todos;
-    if (localStorage.getItem("todos") === null) {
-        todos = [];
-    } else {
-        todos = JSON.parse(localStorage.getItem("todos"));
-    }
-    todos.push({ todo, dueDate, priority, project });
+    let todos = localStorage.getItem("todos") ? JSON.parse(localStorage.getItem("todos")) : [];
+    todos.push({ text: todo, dueDate: dueDate, priority: priority, project: project, completed: false });
     localStorage.setItem("todos", JSON.stringify(todos));
 }
 
 function getLocalTodos() {
-    let todos;
-    if (localStorage.getItem("todos") === null) {
-        todos = [];
-    } else {
-        todos = JSON.parse(localStorage.getItem("todos"));
-    }
-    todos.forEach(todoData => {
-        const todoDiv = document.createElement("div");
-        todoDiv.classList.add("todo");
+    let todos = localStorage.getItem("todos") ? JSON.parse(localStorage.getItem("todos")) : [];
+    todos.forEach(todo => {
+        const selectedProject = projectDropdown.value;
+        if (todo.project === selectedProject || selectedProject === "default") {
+            const todoDiv = document.createElement("div");
+            todoDiv.classList.add("todo");
+            
+            const newTodo = document.createElement("li");
+            newTodo.innerText = todo.text; 
+            newTodo.classList.add("todo-item");
+            todoDiv.appendChild(newTodo);
 
-        const newTodo = document.createElement("li");
-        newTodo.innerText = todoData.todo;
-        newTodo.classList.add("todo-item");
-        todoDiv.appendChild(newTodo);
+            const dueDate = document.createElement("span");
+            dueDate.innerText = todo.dueDate ? `Due: ${todo.dueDate}` : "No Due Date";
+            dueDate.classList.add("due-date");
+            todoDiv.appendChild(dueDate);
 
-        const dueDate = document.createElement("span");
-        dueDate.innerText = todoData.dueDate ? `Due: ${todoData.dueDate}` : "No Due Date";
-        dueDate.classList.add("due-date");
-        todoDiv.appendChild(dueDate);
+            const priority = document.createElement("span");
+            priority.innerText = `Priority: ${todo.priority}`;
+            priority.classList.add("priority");
+            todoDiv.appendChild(priority);
 
-        const priority = document.createElement("span");
-        priority.innerText = `Priority: ${todoData.priority}`;
-        priority.classList.add("priority");
-        todoDiv.appendChild(priority);
+            // Completed Button
+            const completedButton = document.createElement("button");
+            completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
+            completedButton.classList.add("complete-btn");
+            todoDiv.appendChild(completedButton);
 
-        const completedButton = document.createElement("button");
-        completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
-        completedButton.classList.add("complete-btn");
-        todoDiv.appendChild(completedButton);
+            // Delete Button
+            const deleteButton = document.createElement("button");
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteButton.classList.add("delete-btn");
+            todoDiv.appendChild(deleteButton);
+            
+            // Append to List
+            todoList.appendChild(todoDiv);
 
-        const deleteButton = document.createElement("button");
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteButton.classList.add("delete-btn");
-        todoDiv.appendChild(deleteButton);
-
-        todoList.appendChild(todoDiv);
+            // Check if completed
+            if (todo.completed) {
+                todoDiv.classList.add("completed");
+            }
+        }
     });
 }
 
 function removeLocalTodos(todo) {
-    let todos;
-    if (localStorage.getItem("todos") === null) {
-        todos = [];
-    } else {
-        todos = JSON.parse(localStorage.getItem("todos"));
-    }
-    const todoText = todo.children[0].innerText;
-    todos = todos.filter(t => t.todo !== todoText);
+    let todos = localStorage.getItem("todos") ? JSON.parse(localStorage.getItem("todos")) : [];
+    const todoText = todo.querySelector(".todo-item").innerText;
+    todos = todos.filter(t => t.text !== todoText);
     localStorage.setItem("todos", JSON.stringify(todos));
 }
-    
